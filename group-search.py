@@ -95,7 +95,7 @@ def search_titles():
 
 def sab_link(link):
     querystring = { "mode": "addurl", "name": link, "apikey": sab_nzb_key, "output": "text"}
-    return sab_url + '?' + urllib.parse.urlencode(querystring)
+    return f'{sab_url}?{urllib.parse.urlencode(querystring)}'
 
 
 def browse_titles():
@@ -117,22 +117,19 @@ def indent_table(a):
     # Loop
     for x in a:
         t = x.pop()
-        if t['age'] <= last_age:
-            t['new'] = 'NEW!'
-        else:
-            t['new'] = ''
+        t['new'] = 'NEW!' if t['age'] <= last_age else ''
         output = output + "<tr class=\"parent\"><td><b><a href='{link}'>{title}</a> [{age} hours]</b> <a href=\"{download}\">Push</a> {new}</td></tr>".format(**t)
         # If after pop, then indent all the others
         if (len(x) != 0):
             for y in x:
                 output = output + "<tr class=\"child\"><td></td><td>{title} [{age} hours]</td></tr>".format(**y)
-    output = output + '</table>'
+    output = f'{output}</table>'
     return str(output)
 
 
 def group_matches(titles):
     # From S/O, Thanks!
-    grs = list()
+    grs = []
     for name in titles:
         for g in grs:
             if all(fuzz.ratio(name['gtitle'], w['gtitle']) > fuzziness for w in g):
@@ -140,10 +137,7 @@ def group_matches(titles):
                 break
         else:
             grs.append([name, ])
-    s = []
-    # Sort each group
-    for t in grs:
-        s.append(sorted(t, key=lambda d: d['age'], reverse=True))
+    s = [sorted(t, key=lambda d: d['age'], reverse=True) for t in grs]
     # Now sort the entire list, by the earliest in each group
     return sorted(s, key=lambda d: d[-1]['age'])
 
